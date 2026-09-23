@@ -4,29 +4,68 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const [cardsVisible, setCardsVisible] = useState(false);
-  const highlightsRef = useRef(null);
+  const [visibleCards, setVisibleCards] = useState({});
+  const card1Ref = useRef(null);
+  const card2Ref = useRef(null);
+  const card3Ref = useRef(null);
 
+  // Slow smooth scroll helper function
+  const slowSmoothScrollTo = (targetSelector, duration = 1500) => {
+    const target = document.querySelector(targetSelector);
+    if (!target) return;
+    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    let startTime = null;
+
+    function animation(currentTime) {
+      if (startTime === null) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+
+      // easeInOutCubic for a smooth, slow, cinematic glide
+      const ease = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      window.scrollTo(0, startPosition + distance * ease);
+
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    }
+
+    requestAnimationFrame(animation);
+  };
+
+  // Scroll trigger observer for the cards (alternating side entrance on mobile)
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setCardsVisible(true);
-        }
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = entry.target.getAttribute('data-card-index');
+            if (index !== null) {
+              setVisibleCards((prev) => ({ ...prev, [index]: true }));
+            }
+          }
+        });
       },
       {
-        threshold: 0.1,
-        rootMargin: '0px 0px -40px 0px',
+        threshold: 0,
+        rootMargin: '0px 0px -40% 0px',
       }
     );
 
-    const currentElem = highlightsRef.current;
-    if (currentElem) {
-      observer.observe(currentElem);
-    }
+    const refs = [card1Ref.current, card2Ref.current, card3Ref.current];
+    refs.forEach((elem) => {
+      if (elem) observer.observe(elem);
+    });
 
     return () => {
-      if (currentElem) observer.unobserve(currentElem);
+      refs.forEach((elem) => {
+        if (elem) observer.unobserve(elem);
+      });
     };
   }, []);
 
@@ -101,25 +140,27 @@ export default function LandingPage() {
             Freshers&apos; Day 2026 — Your official pass back to the halls, friendships, and memories where it all began.
           </p>
 
-          {/* Primary CTA Button */}
+          {/* Primary CTA Button: Smoothly and slowly scrolls to #checkin-now */}
           <div className="w-full max-w-xs flex flex-col items-center gap-3">
-            <Link
-              href="/checkin"
+            <button
+              type="button"
+              onClick={() => slowSmoothScrollTo('#checkin-now', 1500)}
               className="group w-full min-h-[54px] px-8 py-3.5 rounded-full bg-gradient-to-r from-[#C5A059] via-[#DFBA73] to-[#F1D78A] hover:from-[#B89249] hover:to-[#E5C370] text-[#0A192F] font-display font-bold text-base sm:text-lg flex items-center justify-center gap-2 shadow-lg animate-gold-breathing active:scale-95 transition-all duration-150 cursor-pointer select-none"
             >
               <span>Get Your Pass</span>
               <span className="transition-transform duration-200 group-hover:translate-x-1 group-active:translate-x-1 font-bold">
                 →
               </span>
-            </Link>
+            </button>
             <span className="text-xs text-[#B0C4DE] font-normal">
               Takes less than 30 seconds
             </span>
           </div>
 
           {/* Animated Scroll Prompt Indicator */}
-          <a
-            href="#highlights"
+          <button
+            type="button"
+            onClick={() => slowSmoothScrollTo('#highlights', 1000)}
             aria-label="Scroll to highlights section"
             className="mt-12 sm:mt-16 text-[#B0C4DE] hover:text-[#FDFDFD] transition-colors p-2 flex flex-col items-center gap-2 group cursor-pointer"
           >
@@ -129,17 +170,16 @@ export default function LandingPage() {
             <div className="w-5 h-8 rounded-full border border-[#B0C4DE]/30 flex items-start justify-center p-1 bg-[#0E223D]/50">
               <div className="w-1.5 h-2 rounded-full bg-[#DAA520] animate-subtle-bounce" />
             </div>
-          </a>
+          </button>
 
         </section>
 
         {/* ======================================================== */}
-        {/* 3. HIGHLIGHTS & MEMORIES (Steps Cards with #222222 & Sliding Trigger) */}
+        {/* 3. HIGHLIGHTS & MEMORIES (Steps Cards with Alternating Mobile Slide) */}
         {/* ======================================================== */}
         <section 
           id="highlights" 
-          ref={highlightsRef} 
-          className="w-full max-w-3xl mx-auto px-5 sm:px-6 py-16 sm:py-24 border-t border-[#DAA520]/20 relative"
+          className="w-full max-w-3xl mx-auto px-5 sm:px-6 py-16 sm:py-24 border-t border-[#DAA520]/20 relative overflow-hidden md:overflow-visible"
         >
           
           {/* Section Header */}
@@ -155,15 +195,17 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* 3 Steps Cards: Background #222222 + Sliding Scroll Trigger Animation */}
+          {/* 3 Steps Cards: Mobile Alternating Scroll Trigger (Right -> Left -> Right) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
             
-            {/* Card 1: Skip the Line (Slides in from bottom-left) */}
+            {/* Card 1: Skip the Line (Mobile: Slides in from the RIGHT) */}
             <div 
+              ref={card1Ref}
+              data-card-index="0"
               className={`rounded-2xl p-6 sm:p-7 bg-[#222222] border border-[#DAA520]/25 hover:border-[#DAA520]/50 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all duration-700 ease-out active:scale-[0.98] group flex flex-col justify-between ${
-                cardsVisible 
-                  ? 'opacity-100 translate-y-0 translate-x-0' 
-                  : 'opacity-0 translate-y-16 -translate-x-8'
+                visibleCards['0']
+                  ? 'opacity-100 translate-x-0 translate-y-0'
+                  : 'opacity-0 translate-x-24 md:translate-x-0 md:translate-y-10'
               }`}
             >
               <div>
@@ -182,13 +224,14 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Card 2: Digital Access (Slides in from center-bottom with delay) */}
+            {/* Card 2: Digital Access (Mobile: Slides in from the LEFT) */}
             <div 
-              style={{ transitionDelay: cardsVisible ? '150ms' : '0ms' }}
+              ref={card2Ref}
+              data-card-index="1"
               className={`rounded-2xl p-6 sm:p-7 bg-[#222222] border border-[#DAA520]/25 hover:border-[#DAA520]/50 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all duration-700 ease-out active:scale-[0.98] group flex flex-col justify-between ${
-                cardsVisible 
-                  ? 'opacity-100 translate-y-0' 
-                  : 'opacity-0 translate-y-20'
+                visibleCards['1']
+                  ? 'opacity-100 translate-x-0 translate-y-0'
+                  : 'opacity-0 -translate-x-24 md:translate-x-0 md:translate-y-10'
               }`}
             >
               <div>
@@ -207,13 +250,14 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Card 3: Alumni Lounge (Slides in from bottom-right with delay) */}
+            {/* Card 3: Alumni Lounge (Mobile: Slides in from the RIGHT) */}
             <div 
-              style={{ transitionDelay: cardsVisible ? '300ms' : '0ms' }}
+              ref={card3Ref}
+              data-card-index="2"
               className={`rounded-2xl p-6 sm:p-7 bg-[#222222] border border-[#DAA520]/25 hover:border-[#DAA520]/50 shadow-[0_12px_32px_rgba(0,0,0,0.55)] transition-all duration-700 ease-out active:scale-[0.98] group flex flex-col justify-between ${
-                cardsVisible 
-                  ? 'opacity-100 translate-y-0 translate-x-0' 
-                  : 'opacity-0 translate-y-16 translate-x-8'
+                visibleCards['2']
+                  ? 'opacity-100 translate-x-0 translate-y-0'
+                  : 'opacity-0 translate-x-24 md:translate-x-0 md:translate-y-10'
               }`}
             >
               <div>
@@ -237,9 +281,12 @@ export default function LandingPage() {
         </section>
 
         {/* ======================================================== */}
-        {/* 4. ACTION / LAUNCHPAD (CTA Section) */}
+        {/* 4. ACTION / LAUNCHPAD (Destination for "Get Your Pass" Smooth Scroll) */}
         {/* ======================================================== */}
-        <section className="w-full max-w-2xl mx-auto px-5 sm:px-6 py-16 sm:py-20 text-center relative border-t border-[#DAA520]/20">
+        <section 
+          id="checkin-now" 
+          className="w-full max-w-2xl mx-auto px-5 sm:px-6 py-16 sm:py-20 text-center relative border-t border-[#DAA520]/20"
+        >
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0E223D]/80 border border-[#DAA520]/30 text-[#F1D78A] text-xs font-medium mb-4 shadow-sm">
             <span>✨</span>

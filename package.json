@@ -1,0 +1,19 @@
+{
+  "name": "alumni-checkin",
+  "version": "1.0.0",
+  "description": "Mobile-first alumni check-in prototype with Excel data source and WhatsApp welcome messaging",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "generate-qr": "node generate-qr.js",
+    "seed-sample": "node create-sample-data.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "qrcode": "^1.5.3",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.23.0",
+    "xlsx": "^0.18.5"
+  }
+}

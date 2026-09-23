@@ -8,3 +8,5 @@ checkin-qr.png
 *.log
 .DS_Store
 Thumbs.db
+cloudflared.exe
+.cache/

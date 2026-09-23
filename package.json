@@ -4,6 +4,7 @@
   "description": "Mobile-first alumni check-in prototype with Excel data source and WhatsApp welcome messaging",
   "main": "server.js",
   "scripts": {
+    "build": "npx puppeteer browsers install chrome",
     "start": "node server.js",
     "generate-qr": "node generate-qr.js",
     "seed-sample": "node create-sample-data.js"

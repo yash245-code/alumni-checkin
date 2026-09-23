@@ -24,19 +24,20 @@ function getLocalIp() {
 
 const defaultUrl = `http://${getLocalIp()}:3000`;
 const targetUrl = process.argv[2] || defaultUrl;
-const outputFileName = 'checkin-qr-fullhd.png';
-const outputPath = path.join(qrDir, outputFileName);
+const ultraHdFileName = 'checkin-qr-ultrahd.png';
+const ultraHdPath = path.join(qrDir, ultraHdFileName);
+const fullHdPath = path.join(qrDir, 'checkin-qr-fullhd.png');
 const standardPath = path.join(qrDir, 'checkin-qr.png');
 
 console.log(`\n======================================================`);
-console.log(`🎯 Generating Full HD QR Code`);
+console.log(`🎯 Generating Ultra HD (4K) QR Code`);
 console.log(`🌐 Target URL: ${targetUrl}`);
-console.log(`📁 Destination: ${outputPath}`);
+console.log(`📁 Destination: ${ultraHdPath}`);
 console.log(`======================================================\n`);
 
-// Generate Full HD (1920x1920) QR Code with high error correction
-QRCode.toFile(outputPath, targetUrl, {
-  width: 1920,
+// Generate Ultra HD (3840x3840) 4K QR Code with maximum error correction (Level H)
+QRCode.toFile(ultraHdPath, targetUrl, {
+  width: 3840,
   margin: 3,
   color: {
     dark: '#0f172a',
@@ -45,19 +46,20 @@ QRCode.toFile(outputPath, targetUrl, {
   errorCorrectionLevel: 'H'
 }, (err) => {
   if (err) {
-    console.error('❌ Failed to generate Full HD QR code:', err);
+    console.error('❌ Failed to generate Ultra HD QR code:', err);
     process.exit(1);
   }
 
-  // Also write standard checkin-qr.png in QR folder
+  // Also maintain standard copies
   try {
-    fs.copyFileSync(outputPath, standardPath);
+    fs.copyFileSync(ultraHdPath, standardPath);
+    fs.copyFileSync(ultraHdPath, fullHdPath);
   } catch (copyErr) {
     // Ignore copy error
   }
 
-  console.log(`✅ Successfully generated Full HD (1920x1920) QR code:`);
-  console.log(`   -> ${outputPath}`);
+  console.log(`✅ Successfully generated Ultra HD (3840x3840) QR code:`);
+  console.log(`   -> ${ultraHdPath}`);
   console.log(`   -> ${standardPath}\n`);
 
   // Print ASCII preview to terminal

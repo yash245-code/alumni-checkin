@@ -2,6 +2,7 @@ node_modules/
 .wwebjs_auth/
 .wwebjs_cache/
 QR/
+data/alumni.xlsx
 checkin-qr.png
 .env
 *.log

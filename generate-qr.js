@@ -23,7 +23,12 @@ function getLocalIp() {
 }
 
 const defaultUrl = `http://${getLocalIp()}:3000`;
-const targetUrl = process.argv[2] || defaultUrl;
+let targetUrl = process.argv[2] || defaultUrl;
+
+// Ensure target points to landing page (index.html or root), not directly to checkin.html
+if (targetUrl.endsWith('/checkin.html') || targetUrl.endsWith('/checkin')) {
+  targetUrl = targetUrl.replace(/\/checkin(\.html)?$/, '/');
+}
 const ultraHdFileName = 'checkin-qr-ultrahd.png';
 const ultraHdPath = path.join(qrDir, ultraHdFileName);
 const fullHdPath = path.join(qrDir, 'checkin-qr-fullhd.png');
@@ -50,17 +55,20 @@ QRCode.toFile(ultraHdPath, targetUrl, {
     process.exit(1);
   }
 
-  // Also maintain standard copies
+  // Also maintain standard copies and copy to root folder
   try {
     fs.copyFileSync(ultraHdPath, standardPath);
     fs.copyFileSync(ultraHdPath, fullHdPath);
+    fs.copyFileSync(ultraHdPath, path.join(__dirname, 'checkin-qr-ultrahd.png'));
+    fs.copyFileSync(ultraHdPath, path.join(__dirname, 'checkin-qr.png'));
   } catch (copyErr) {
     // Ignore copy error
   }
 
   console.log(`✅ Successfully generated Ultra HD (3840x3840) QR code:`);
   console.log(`   -> ${ultraHdPath}`);
-  console.log(`   -> ${standardPath}\n`);
+  console.log(`   -> ${path.join(__dirname, 'checkin-qr-ultrahd.png')}`);
+  console.log(`   -> ${path.join(__dirname, 'checkin-qr.png')}\n`);
 
   // Print ASCII preview to terminal
   QRCode.toString(targetUrl, { type: 'terminal', small: true }, (termErr, termQr) => {

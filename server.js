@@ -3,8 +3,6 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const xlsx = require('xlsx');
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcodeTerminal = require('qrcode-terminal');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,93 +64,35 @@ function loadAlumniData() {
 // Load once into memory at startup
 loadAlumniData();
 
-// ----------------------------------------------------
-// 2. WHATSAPP CLIENT SETUP
-// ----------------------------------------------------
-let isWhatsAppReady = false;
-
-const whatsappClient = new Client({
-  authStrategy: new LocalAuth({
-    dataPath: path.join(__dirname, '.wwebjs_auth')
-  }),
-  puppeteer: {
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  }
-});
-
-let hasPrintedQr = false;
-
-whatsappClient.on('qr', (qr) => {
-  if (hasPrintedQr) {
-    return; // Prevent re-printing QR repeatedly in terminal
-  }
-  hasPrintedQr = true;
-
-  console.log('\n======================================================');
-  console.log('📲 SCAN THIS QR CODE WITH WHATSAPP TO LOG IN:');
-  console.log('======================================================\n');
-  qrcodeTerminal.generate(qr, { small: true });
-  console.log('\n(Session will be saved in .wwebjs_auth for future restarts)\n');
-});
-
-whatsappClient.on('ready', () => {
-  isWhatsAppReady = true;
-  console.log('✨ WhatsApp client is authenticated and ready to send messages!');
-});
-
-whatsappClient.on('authenticated', () => {
-  console.log('🔐 WhatsApp authenticated successfully.');
-});
-
-whatsappClient.on('auth_failure', (msg) => {
-  console.error('❌ WhatsApp authentication failure:', msg);
-});
-
-whatsappClient.on('disconnected', (reason) => {
-  isWhatsAppReady = false;
-  console.warn('⚠️ WhatsApp client disconnected:', reason);
-});
-
-// Launch WhatsApp client asynchronously
-whatsappClient.initialize().catch((err) => {
-  console.error('⚠️ WhatsApp client initialization error:', err.message);
-  console.warn('Backend API will continue serving requests.');
-});
-
-async function sendWhatsAppWelcome(phone, name) {
-  if (!phone) {
-    console.warn(`[WHATSAPP] Skipping message for ${name}: No phone number on record.`);
-    return;
-  }
-
-  const chatId = `${phone}@c.us`;
-  const message = `🎉 Welcome back, ${name}! Great to have you at the Freshers event today. Enjoy!`;
-
-  if (!isWhatsAppReady) {
-    console.warn(`[WHATSAPP] Cannot send message to ${name} (${chatId}): WhatsApp client not logged in yet. Scan the terminal QR code to connect.`);
-    return;
-  }
-
-  try {
-    await whatsappClient.sendMessage(chatId, message);
-    console.log(`[WHATSAPP] Sent welcome message to ${name} (${chatId})`);
-  } catch (err) {
-    // Log failures, never crash the server
-    console.error(`[WHATSAPP] Error sending to ${name} (${chatId}):`, err.message);
-  }
+// Optional: auto-reload on Excel file modification without server restart
+try {
+  fs.watchFile(dataFilePath, { interval: 2000 }, (curr, prev) => {
+    if (curr.mtime !== prev.mtime) {
+      console.log('🔄 Detected modification in data/alumni.xlsx, reloading records...');
+      loadAlumniData();
+    }
+  });
+} catch (watchErr) {
+  // Ignore watch error if filesystem doesn't support it
 }
 
 // ----------------------------------------------------
-// 3. REST API ENDPOINTS
+// 2. REST API ENDPOINTS
 // ----------------------------------------------------
 
-// Health sanity-check endpoint
+// Health check endpoint - returns { loaded: alumni.length }
 app.get('/api/health', (req, res) => {
   res.json({
-    status: 'ok',
-    loaded: alumni.length,
-    whatsappReady: isWhatsAppReady
+    loaded: alumni.length
+  });
+});
+
+// Manual reload endpoint
+app.get('/api/reload', (req, res) => {
+  loadAlumniData();
+  res.json({
+    status: 'reloaded',
+    loaded: alumni.length
   });
 });
 
@@ -174,10 +114,10 @@ app.post('/api/lookup', (req, res) => {
     if (person.email && person.email === normalizedInputEmail) {
       return true;
     }
-    // Check Phone match (allow matching if phone input has at least 7 digits)
+    // Check Phone match
     if (person.phone && normalizedInputPhone.length >= 7) {
       if (person.phone === normalizedInputPhone) return true;
-      // Handle cases where user input may omit country code (e.g. 9876543210 vs 919876543210)
+      // Handle cases where user input or sheet has country code differences
       if (person.phone.endsWith(normalizedInputPhone) || normalizedInputPhone.endsWith(person.phone)) {
         return true;
       }
@@ -189,25 +129,28 @@ app.post('/api/lookup', (req, res) => {
     return res.json({ found: false });
   }
 
-  // Found: Respond immediately to user
+  // Found: Respond immediately with attendee name
   res.json({
     found: true,
     name: matched.name
   });
-
-  // Asynchronously dispatch WhatsApp welcome message without blocking HTTP response
-  setImmediate(() => {
-    sendWhatsAppWelcome(matched.phone, matched.name);
-  });
 });
 
-// Fallback to index.html
+// Fallback routing: default to index.html for root, checkin.html for /checkin
+app.get('/checkin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'checkin.html'));
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Express Server
-app.listen(PORT, () => {
-  console.log(`🚀 Alumni Check-In server running on http://localhost:${PORT}`);
-  console.log(`📊 Health check available at http://localhost:${PORT}/api/health`);
-});
+// Start Express Server if run directly or not on serverless
+if (require.main === module || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Alumni Check-In server running on http://localhost:${PORT}`);
+    console.log(`📊 Health check available at http://localhost:${PORT}/api/health`);
+  });
+}
+
+module.exports = app;

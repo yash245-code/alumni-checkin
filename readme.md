@@ -1,6 +1,6 @@
-# 🎓 Alumni Check-In Prototype
+# 🎓 Alumni Check-In
 
-A lightweight, mobile-first Node.js & Express check-in system for event kiosks and attendee self-checkin. Attendees scan a QR code at the entrance, enter their email or phone number on their phones, receive instant personalized visual confirmation, and get an automated WhatsApp welcome message sent via `whatsapp-web.js`.
+A lightweight, mobile-first Node.js & Express check-in system for college events and alumni homecomings. Attendees scan a QR code at the entrance, view an animated event landing page, tap to the check-in form, and verify their attendance with instant visual confirmation.
 
 ---
 
@@ -16,109 +16,82 @@ Place your event alumni spreadsheet at:
 ```
 data/alumni.xlsx
 ```
-The spreadsheet must contain these exact column headers in the first sheet:
+The spreadsheet must contain these column headers in the first sheet:
 | Name | Email | Phone |
 | :--- | :--- | :--- |
 | Priya Sharma | priya.sharma@example.com | 919876543210 |
 | Aarav Patel | aarav.patel@example.com | 919812345678 |
 
-> **Note on Phone Format**: Provide digits only in international format with country code (e.g. `919999999999`, no `+`, `-`, or spaces). The system automatically strips non-digit characters and normalizes numbers upon loading.
+> **Note on Data Normalization**: 
+> - Emails are automatically lowercased and trimmed.
+> - Phone numbers have non-digit characters (`+`, `-`, spaces, parentheses) stripped automatically.
+> - Data is loaded once into memory on startup for lightning-fast lookups.
+> - If `data/alumni.xlsx` doesn't exist, running `npm start` or `npm run seed-sample` will auto-generate starter test data.
 
-*(If `data/alumni.xlsx` doesn't exist yet, run `npm run seed-sample` or start the server — a starter spreadsheet with test data will be generated automatically).*
-
-### 3. Start the Server
+### 3. Start the Server Locally
 ```bash
 npm start
 ```
-
-### 4. Scan WhatsApp QR Code on First Run
-When the server starts for the first time, a QR code will be printed directly in your terminal:
-1. Open **WhatsApp** on your phone.
-2. Tap **Settings** (iOS) or **Three Dots** (Android) ➔ **Linked Devices** ➔ **Link a Device**.
-3. Scan the terminal QR code.
-4. Your login session will be securely persisted in `.wwebjs_auth/`. You will not need to scan again on restarts.
+The server will start at: `http://localhost:3000`
 
 ---
 
 ## 📱 Generating the Check-In QR Poster
 
-To generate a high-resolution QR code image for printing or displaying at the event registration desk / entrance:
+To generate a QR code image for printing or displaying at the event entrance (points to the landing page `index.html`):
 
 ```bash
 # Generate QR code pointing to your deployed URL or Ngrok tunnel
-node generate-qr.js https://your-deployed-domain.com
+node generate-qr.js https://your-domain.com
 ```
-This produces `checkin-qr.png` in the project root.
+This produces `checkin-qr.png` (and `checkin-qr-ultrahd.png` for 4K printing) in the project root.
 
 ---
 
-## 🌐 Running for Tonight's Event
+## 🌐 Deploying & Running Tonight
 
-### Option A: Local Tunnel via Ngrok (Recommended for Tonight)
-Running locally on your laptop with an ngrok tunnel is the fastest and most reliable setup for tonight because it keeps your WhatsApp session active without dealing with cloud browser dependencies:
+### Option A: Deploy to Vercel (Fastest & Recommended)
+1. Push this repository to your GitHub account (private or public).
+2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project**.
+3. Import your `alumni-checkin` repository.
+4. Framework Preset: **Other**.
+5. Click **Deploy**. Vercel will build and deploy your app in under 15 seconds!
 
-1. Start the check-in server:
+### Option B: Deploy to Render / Railway
+- **Render**: Create a Web Service from your GitHub repo.
+  - Build Command: `npm install`
+  - Start Command: `npm start`
+- **Railway**: Click **New Project** → **Deploy from GitHub repo**. Railway automatically detects `npm start`.
+
+### Option C: Run Locally with Ngrok (For Tonight)
+If you want to run directly from your laptop without cloud hosting:
+1. Start the server:
    ```bash
    npm start
    ```
-2. In a separate terminal, start an ngrok tunnel on port 3000:
+2. In a second terminal, open an ngrok tunnel:
    ```bash
    npx ngrok http 3000
    ```
-3. Copy the public `https://xxxx.ngrok-free.app` URL provided by ngrok.
-4. Generate the entrance QR poster with that URL:
+3. Copy the public `https://xxxx.ngrok-free.app` URL and generate your entrance QR poster:
    ```bash
    node generate-qr.js https://xxxx.ngrok-free.app
    ```
-5. Print `checkin-qr.png` or display it on a tablet/monitor at the registration counter!
 
 ---
 
-### Option B: Deploying to Railway / Render
-
-#### Railway:
-1. Push this repository to GitHub.
-2. In Railway, click **New Project** ➔ **Deploy from GitHub repo**.
-3. Railway automatically detects `npm start`.
-4. Check the **Deploy Logs** on Railway to see the WhatsApp QR code printed in the build/run logs, and scan it with WhatsApp.
-
-#### Render:
-1. Create a **New Web Service** connected to your repository.
-2. Build Command: `npm install`
-3. Start Command: `npm start`
-4. Add environment variable `PORT=3000`.
-5. View the service **Logs** in the Render dashboard to scan the WhatsApp QR code.
-*(Note: Because cloud hosts have ephemeral file systems unless persistent disks are mounted, `.wwebjs_auth` requires a persistent volume or re-scanning if the dyno restarts).*
-
----
-
-## 🔍 API & Health Check
+## 🔍 API Endpoints
 
 - `GET /api/health`
-  Sanity check endpoint before the event starts. Returns:
+  Sanity check endpoint to verify the sheet is loaded before the event:
   ```json
-  {
-    "status": "ok",
-    "loaded": 5,
-    "whatsappReady": true
-  }
+  { "loaded": 7 }
   ```
 
 - `POST /api/lookup`
   Body: `{ "identifier": "priya.sharma@example.com" }` or `{ "identifier": "9876543210" }`
-  Response (Match):
-  ```json
-  {
-    "found": true,
-    "name": "Priya Sharma"
-  }
-  ```
-  Response (No match):
-  ```json
-  {
-    "found": false
-  }
-  ```
+  - Response (Match): `{ "found": true, "name": "Priya Sharma" }`
+  - Response (No match): `{ "found": false }`
 
 ---
 
@@ -129,11 +102,12 @@ alumni-checkin/
 ├── data/
 │   └── alumni.xlsx          # Event spreadsheet (Name, Email, Phone)
 ├── public/
-│   └── index.html           # Mobile-first checkin interface (~375px baseline)
-├── .gitignore               # Excludes node_modules, .wwebjs_auth, cache
-├── create-sample-data.js    # Generates sample data/alumni.xlsx
+│   ├── index.html           # Animated landing page (Hero, Mid, CTA "Get You In 🚀")
+│   └── checkin.html         # Mobile check-in card (~375px baseline)
+├── create-sample-data.js    # Generates starter data/alumni.xlsx
 ├── generate-qr.js           # Generates checkin-qr.png from URL
-├── package.json             # Express, whatsapp-web.js, xlsx, qrcode, cors
-├── server.js                # Core API, SheetJS loader, WhatsApp client
+├── package.json             # Express, xlsx, qrcode, cors
+├── server.js                # Core API & SheetJS in-memory loader
+├── vercel.json              # Vercel deployment configuration
 └── README.md
 ```

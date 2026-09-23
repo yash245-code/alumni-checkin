@@ -1,8 +1,6 @@
 node_modules/
-.wwebjs_auth/
-.wwebjs_cache/
-data/alumni.xlsx
-checkin-qr.png
+checkin-qr*.png
+QR/
 .env
 *.log
 .DS_Store

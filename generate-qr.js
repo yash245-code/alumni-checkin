@@ -55,7 +55,7 @@ QRCode.toFile(ultraHdPath, targetUrl, {
     process.exit(1);
   }
 
-  // Also maintain copies in public/ and root folder
+  // Also maintain copies in public/ and QR formats
   try {
     const publicDir = path.join(__dirname, 'public');
     if (!fs.existsSync(publicDir)) {
@@ -63,8 +63,6 @@ QRCode.toFile(ultraHdPath, targetUrl, {
     }
     fs.copyFileSync(ultraHdPath, standardPath);
     fs.copyFileSync(ultraHdPath, fullHdPath);
-    fs.copyFileSync(ultraHdPath, path.join(__dirname, 'checkin-qr-ultrahd.png'));
-    fs.copyFileSync(ultraHdPath, path.join(__dirname, 'checkin-qr.png'));
     fs.copyFileSync(ultraHdPath, path.join(publicDir, 'checkin-qr.png'));
   } catch (copyErr) {
     // Ignore copy error
@@ -72,8 +70,7 @@ QRCode.toFile(ultraHdPath, targetUrl, {
 
   console.log(`✅ Successfully generated Ultra HD (3840x3840) QR code:`);
   console.log(`   -> ${ultraHdPath}`);
-  console.log(`   -> ${path.join(__dirname, 'public', 'checkin-qr.png')}`);
-  console.log(`   -> ${path.join(__dirname, 'checkin-qr.png')}\n`);
+  console.log(`   -> ${path.join(__dirname, 'public', 'checkin-qr.png')}\n`);
 
   // Print ASCII preview to terminal
   QRCode.toString(targetUrl, { type: 'terminal', small: true }, (termErr, termQr) => {

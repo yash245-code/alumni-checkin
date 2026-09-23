@@ -8,11 +8,11 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const sampleAlumni = [
-  { Name: 'Priya Sharma', Email: 'priya.sharma@example.com', Phone: '919876543210' },
-  { Name: 'Aarav Patel', Email: 'aarav.patel@example.com', Phone: '919812345678' },
-  { Name: 'Rohan Verma', Email: 'rohan.verma@example.com', Phone: '919898989898' },
-  { Name: 'Ananya Iyer', Email: 'ananya.iyer@example.com', Phone: '919765432109' },
-  { Name: 'Vikram Singh', Email: 'vikram.singh@example.com', Phone: '919123456780' }
+  { Name: 'Priya Sharma', Email: 'priya.sharma@example.com', Phone: '919876543210', Department: 'Dept of Computer Science' },
+  { Name: 'Aarav Patel', Email: 'aarav.patel@example.com', Phone: '919812345678', Department: 'Dept of Commerce and Management' },
+  { Name: 'Rohan Verma', Email: 'rohan.verma@example.com', Phone: '919898989898', Department: 'Dept of Hotel Management' },
+  { Name: 'Ananya Iyer', Email: 'ananya.iyer@example.com', Phone: '919765432109', Department: 'Dept of Biotechnology' },
+  { Name: 'Vikram Singh', Email: 'vikram.singh@example.com', Phone: '919123456780', Department: 'Dept of B.Ed' }
 ];
 
 const worksheet = xlsx.utils.json_to_sheet(sampleAlumni);

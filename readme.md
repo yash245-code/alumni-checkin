@@ -68,8 +68,7 @@ Once your Vercel deployment URL is live (e.g., `https://alumni-checkin.vercel.ap
 node generate-qr.js https://alumni-checkin.vercel.app
 ```
 
-- This encodes your deployed URL's root path (the landing page, not `/checkin` directly).
-- Outputs `public/checkin-qr.png` (accessible directly at `/checkin-qr.png`) and `checkin-qr.png` in the project root.
+- Outputs `public/checkin-qr.png` (accessible directly at `/checkin-qr.png`).
 - Also generates a 4K Ultra HD print-ready version (`QR/checkin-qr-ultrahd.png`).
 
 ---

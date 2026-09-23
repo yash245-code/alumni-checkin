@@ -1,11 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #080808;
-  --text: #EDEDEA;
-  --muted: #6B6B68;
-  --accent: #4A4EFF;
-  --hairline: rgba(237, 237, 234, 0.12);
+  --bg: #0A192F;
+  --navy-deep: #0A192F;
+  --navy-surface: #0E223D;
+  --surface-white: #FDFDFD;
+  --text: #FDFDFD;
+  --text-dark: #0A192F;
+  --text-slate: #2D3748;
+  --muted: #B0C4DE;
+  --accent: #DAA520;
+  --gold-matte: #C5A059;
+  --gold-mid: #DFBA73;
+  --gold-shimmer: #F1D78A;
+  --hairline: rgba(218, 165, 32, 0.2);
+  --hairline-blue: rgba(176, 196, 222, 0.15);
 }
 
 @theme {
@@ -35,74 +44,147 @@
   }
 }
 
-/* Radar Pulse Animation */
-@keyframes radarPing {
+/* Coordinate Graph Background Animation (Watercolor Blue painted on Deep Navy) */
+@keyframes graphDrift {
   0% {
-    transform: scale(0.2);
-    opacity: 0.4;
-  }
-  60% {
-    opacity: 0.25;
+    transform: translate3d(-24px, 0, 0);
   }
   100% {
-    transform: scale(1.05);
-    opacity: 0;
+    transform: translate3d(24px, 0, 0);
   }
 }
 
-.radar-ring {
+.graph-grid-bg {
   position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  border: 1px solid var(--accent);
+  inset: -32px;
+  width: calc(100% + 64px);
+  height: calc(100% + 64px);
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(176, 196, 222, 0.32) 1.2px, transparent 0),
+    linear-gradient(to right, rgba(176, 196, 222, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(176, 196, 222, 0.08) 1px, transparent 1px);
+  background-size: 34px 34px;
+  pointer-events: none;
 }
 
-/* When user prefers motion, animate smoothly */
 @media (prefers-reduced-motion: no-preference) {
-  .radar-ring {
-    opacity: 0;
-    will-change: transform, opacity;
-    animation: radarPing 4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
-  }
-
-  .radar-ring-1 {
-    animation-delay: 0s;
-  }
-  .radar-ring-2 {
-    animation-delay: 1s;
-  }
-  .radar-ring-3 {
-    animation-delay: 2s;
-  }
-  .radar-ring-4 {
-    animation-delay: 3s;
+  .graph-grid-bg {
+    animation: graphDrift 14s ease-in-out infinite alternate;
+    will-change: transform;
   }
 }
 
-/* When reduced motion is preferred, render clean static concentric rings */
-@media (prefers-reduced-motion: reduce) {
-  .radar-ring-1 {
-    inset: 37.5%;
-    opacity: 0.35;
+.graph-vignette {
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 32%, black 35%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 32%, black 35%, transparent 88%);
+}
+
+/* Floating metric badge animations */
+@keyframes floatA {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
   }
-  .radar-ring-2 {
-    inset: 25%;
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes floatB {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-11px) rotate(-1.5deg);
+  }
+}
+
+@keyframes floatC {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(1.2deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-float-a {
+    animation: floatA 5.5s ease-in-out infinite;
+  }
+  .animate-float-b {
+    animation: floatB 6.8s ease-in-out infinite 0.8s;
+  }
+  .animate-float-c {
+    animation: floatC 5s ease-in-out infinite 1.5s;
+  }
+}
+
+/* Warm Golden Glow Breathing Pulse */
+@keyframes goldBreathing {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(218, 165, 32, 0.35), 0 0 45px rgba(218, 165, 32, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(218, 165, 32, 0.65), 0 0 65px rgba(218, 165, 32, 0.3);
+  }
+}
+
+.animate-gold-breathing {
+  animation: goldBreathing 3.6s ease-in-out infinite;
+}
+
+/* Diffuse Watercolor Ink Wash Drifting */
+@keyframes inkWashShift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
     opacity: 0.28;
   }
-  .radar-ring-3 {
-    inset: 12.5%;
-    opacity: 0.22;
-  }
-  .radar-ring-4 {
-    inset: 0%;
-    opacity: 0.16;
+  50% {
+    transform: translate(14px, -12px) scale(1.08);
+    opacity: 0.45;
   }
 }
 
-/* Small helper for spinner if used in form */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-flare-drift {
+    animation: inkWashShift 10s ease-in-out infinite alternate;
+  }
+}
+
+/* Live status pulse */
+@keyframes liveDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+.animate-live-dot {
+  animation: liveDotPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Down arrow bounce prompt */
+@keyframes subtleBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.animate-subtle-bounce {
+  animation: subtleBounce 2.4s ease-in-out infinite;
+}
+
+/* Helper spinner */
 .spinner {
-  border: 2px solid rgba(237, 237, 234, 0.25);
-  border-top-color: #EDEDEA;
+  border: 2px solid rgba(218, 165, 32, 0.3);
+  border-top-color: #DAA520;
   border-radius: 50%;
   animation: spin 0.65s linear infinite;
 }

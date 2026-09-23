@@ -1,83 +1,114 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #080808;
+  --text: #EDEDEA;
+  --muted: #6B6B68;
+  --accent: #4A4EFF;
+  --hairline: rgba(237, 237, 234, 0.12);
+}
+
+@theme {
+  --font-display: var(--font-display), sans-serif;
+  --font-body: var(--font-body), sans-serif;
+  --color-bg: var(--bg);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-hairline: var(--hairline);
+}
+
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
   }
   html {
     scroll-behavior: smooth;
+    background-color: var(--bg);
+    color: var(--text);
   }
   body {
-    background-color: #030712;
-    color: #f9fafb;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body), sans-serif;
     overflow-x: hidden;
   }
 }
 
-/* Custom CSS Keyframe Animations */
-@keyframes drift {
+/* Radar Pulse Animation */
+@keyframes radarPing {
   0% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(40px, 30px) scale(1.08);
-  }
-  100% {
-    transform: translate(-30px, 50px) scale(0.95);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.45), 0 8px 24px rgba(79, 70, 229, 0.35);
-  }
-  50% {
-    box-shadow: 0 0 35px rgba(168, 85, 247, 0.65), 0 10px 30px rgba(99, 102, 241, 0.5);
-  }
-}
-
-@keyframes gentleBounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-8px);
+    transform: scale(0.2);
+    opacity: 0.4;
   }
   60% {
-    transform: translateY(-4px);
+    opacity: 0.25;
   }
+  100% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+
+.radar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--accent);
+}
+
+/* When user prefers motion, animate smoothly */
+@media (prefers-reduced-motion: no-preference) {
+  .radar-ring {
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: radarPing 4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  }
+
+  .radar-ring-1 {
+    animation-delay: 0s;
+  }
+  .radar-ring-2 {
+    animation-delay: 1s;
+  }
+  .radar-ring-3 {
+    animation-delay: 2s;
+  }
+  .radar-ring-4 {
+    animation-delay: 3s;
+  }
+}
+
+/* When reduced motion is preferred, render clean static concentric rings */
+@media (prefers-reduced-motion: reduce) {
+  .radar-ring-1 {
+    inset: 37.5%;
+    opacity: 0.35;
+  }
+  .radar-ring-2 {
+    inset: 25%;
+    opacity: 0.28;
+  }
+  .radar-ring-3 {
+    inset: 12.5%;
+    opacity: 0.22;
+  }
+  .radar-ring-4 {
+    inset: 0%;
+    opacity: 0.16;
+  }
+}
+
+/* Small helper for spinner if used in form */
+.spinner {
+  border: 2px solid rgba(237, 237, 234, 0.25);
+  border-top-color: #EDEDEA;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
-}
-
-.animate-drift {
-  animation: drift 14s infinite alternate ease-in-out;
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2.8s infinite ease-in-out;
-}
-
-.animate-bounce-chevron {
-  animation: gentleBounce 2.2s infinite;
-}
-
-.spinner {
-  border: 2.5px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 0.65s linear infinite;
-}
-
-.blob {
-  position: absolute;
-  filter: blur(80px);
-  border-radius: 9999px;
-  opacity: 0.45;
-  pointer-events: none;
-  z-index: 0;
 }

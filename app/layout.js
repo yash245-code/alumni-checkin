@@ -1,34 +1,32 @@
-import { Poppins, Inter } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["500", "700"],
 });
 
 const inter = Inter({
-  variable: "--font-inter",
+  variable: "--font-body",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
 });
 
 export const metadata = {
-  title: "Alumni Check-In — Freshers' Day 2026",
-  description: "Mobile-first alumni check-in application with instant verification",
+  title: "Freshers' Day 2026 — Alumni Check-In",
+  description: "Official Alumni Check-In portal for Freshers' Day 2026.",
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
-      <body className="font-sans antialiased bg-slate-950 text-white min-h-screen selection:bg-indigo-500 selection:text-white">
+    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
+      <body className="bg-[var(--bg)] text-[var(--text)] font-body antialiased min-h-screen">
         {children}
       </body>
     </html>

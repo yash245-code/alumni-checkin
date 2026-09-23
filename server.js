@@ -81,12 +81,19 @@ const whatsappClient = new Client({
   }
 });
 
+let hasPrintedQr = false;
+
 whatsappClient.on('qr', (qr) => {
+  if (hasPrintedQr) {
+    return; // Prevent re-printing QR repeatedly in terminal
+  }
+  hasPrintedQr = true;
+
   console.log('\n======================================================');
   console.log('📲 SCAN THIS QR CODE WITH WHATSAPP TO LOG IN:');
   console.log('======================================================\n');
   qrcodeTerminal.generate(qr, { small: true });
-  console.log('\n(Your session will be saved in .wwebjs_auth for future restarts)\n');
+  console.log('\n(Session will be saved in .wwebjs_auth for future restarts)\n');
 });
 
 whatsappClient.on('ready', () => {

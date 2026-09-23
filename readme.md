@@ -1,6 +1,8 @@
-# 🎓 Alumni Check-In
+# 🎓 Alumni Check-In (Next.js App Router)
 
-A lightweight, mobile-first Node.js & Express check-in system for college events and alumni homecomings. Attendees scan a QR code at the entrance, view an animated event landing page, tap to the check-in form, and verify their attendance with instant visual confirmation.
+A clean, mobile-first Next.js (App Router) check-in application built for college events, reunions, and homecomings. Optimized for instant zero-configuration deployment on **Vercel**.
+
+Attendees scan an entrance QR code, land on a smooth animated event page, navigate to the check-in form, and verify their attendance with instant visual confirmation.
 
 ---
 
@@ -11,8 +13,8 @@ A lightweight, mobile-first Node.js & Express check-in system for college events
 npm install
 ```
 
-### 2. Prepare the Alumni Spreadsheet
-Place your event alumni spreadsheet at:
+### 2. Prepare Alumni Spreadsheet
+Place your event spreadsheet at:
 ```
 data/alumni.xlsx
 ```
@@ -22,76 +24,68 @@ The spreadsheet must contain these column headers in the first sheet:
 | Priya Sharma | priya.sharma@example.com | 919876543210 |
 | Aarav Patel | aarav.patel@example.com | 919812345678 |
 
-> **Note on Data Normalization**: 
-> - Emails are automatically lowercased and trimmed.
-> - Phone numbers have non-digit characters (`+`, `-`, spaces, parentheses) stripped automatically.
-> - Data is loaded once into memory on startup for lightning-fast lookups.
-> - If `data/alumni.xlsx` doesn't exist, running `npm start` or `npm run seed-sample` will auto-generate starter test data.
+> **Note on Data Handling**:
+> - `data/alumni.xlsx` is bundled as a static asset with your project.
+> - The API route (`app/api/lookup/route.js`) loads and normalizes emails and phone numbers.
+> - Records are cached in memory during warm serverless invocations for maximum speed.
+> - If `data/alumni.xlsx` is not yet present, run `npm run seed-sample` to generate a starter template.
 
-### 3. Start the Server Locally
+### 3. Run Locally
 ```bash
-npm start
+npm run dev
 ```
-The server will start at: `http://localhost:3000`
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📱 Generating the Check-In QR Poster
+## 🚀 Deploying to Vercel
 
-To generate a QR code image for printing or displaying at the event entrance (points to the landing page `index.html`):
+Next.js App Router deploys directly on Vercel without any extra configuration files.
 
-```bash
-# Generate QR code pointing to your deployed URL or Ngrok tunnel
-node generate-qr.js https://your-domain.com
-```
-This produces `checkin-qr.png` (and `checkin-qr-ultrahd.png` for 4K printing) in the project root.
-
----
-
-## 🌐 Deploying & Running Tonight
-
-### Option A: Deploy to Vercel (Fastest & Recommended)
-1. Push this repository to your GitHub account (private or public).
+### Deploy via GitHub (Recommended)
+1. Commit your changes and push to your GitHub repository:
+   ```bash
+   git add -A
+   git commit -m "feat: migrate to Next.js App Router"
+   git push origin main
+   ```
 2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project**.
 3. Import your `alumni-checkin` repository.
-4. Framework Preset: **Other**.
-5. Click **Deploy**. Vercel will build and deploy your app in under 15 seconds!
+4. Click **Deploy**. Vercel will build and launch your site in seconds!
 
-### Option B: Deploy to Render / Railway
-- **Render**: Create a Web Service from your GitHub repo.
-  - Build Command: `npm install`
-  - Start Command: `npm start`
-- **Railway**: Click **New Project** → **Deploy from GitHub repo**. Railway automatically detects `npm start`.
+### Deploy via Vercel CLI
+```bash
+npx vercel
+```
 
-### Option C: Run Locally with Ngrok (For Tonight)
-If you want to run directly from your laptop without cloud hosting:
-1. Start the server:
-   ```bash
-   npm start
-   ```
-2. In a second terminal, open an ngrok tunnel:
-   ```bash
-   npx ngrok http 3000
-   ```
-3. Copy the public `https://xxxx.ngrok-free.app` URL and generate your entrance QR poster:
-   ```bash
-   node generate-qr.js https://xxxx.ngrok-free.app
-   ```
+---
+
+## 📱 Generating the Entrance QR Code
+
+Once your Vercel deployment URL is live (e.g., `https://alumni-checkin.vercel.app`):
+
+```bash
+node generate-qr.js https://alumni-checkin.vercel.app
+```
+
+- This encodes your deployed URL's root path (the landing page, not `/checkin` directly).
+- Outputs `public/checkin-qr.png` (accessible directly at `/checkin-qr.png`) and `checkin-qr.png` in the project root.
+- Also generates a 4K Ultra HD print-ready version (`QR/checkin-qr-ultrahd.png`).
 
 ---
 
 ## 🔍 API Endpoints
 
-- `GET /api/health`
-  Sanity check endpoint to verify the sheet is loaded before the event:
+- **`GET /api/lookup`**
+  Sanity check / health endpoint to verify the spreadsheet is loaded:
   ```json
-  { "loaded": 7 }
+  { "status": "ok", "loaded": 7 }
   ```
 
-- `POST /api/lookup`
+- **`POST /api/lookup`**
   Body: `{ "identifier": "priya.sharma@example.com" }` or `{ "identifier": "9876543210" }`
-  - Response (Match): `{ "found": true, "name": "Priya Sharma" }`
-  - Response (No match): `{ "found": false }`
+  - Match: `{ "found": true, "name": "Priya Sharma" }`
+  - No match: `{ "found": false }`
 
 ---
 
@@ -99,15 +93,23 @@ If you want to run directly from your laptop without cloud hosting:
 
 ```
 alumni-checkin/
+├── app/
+│   ├── layout.js            # Root layout with Poppins/Inter fonts & mobile viewport
+│   ├── page.js              # Animated landing page ('use client')
+│   ├── globals.css          # Tailwind CSS & keyframe animations (drift, pulse)
+│   ├── checkin/
+│   │   └── page.js          # Mobile check-in form ('use client')
+│   └── api/
+│       └── lookup/
+│           └── route.js     # Serverless POST lookup & GET health check
 ├── data/
-│   └── alumni.xlsx          # Event spreadsheet (Name, Email, Phone)
+│   └── alumni.xlsx          # Bundled alumni records (Name, Email, Phone)
 ├── public/
-│   ├── index.html           # Animated landing page (Hero, Mid, CTA "Get You In 🚀")
-│   └── checkin.html         # Mobile check-in card (~375px baseline)
-├── create-sample-data.js    # Generates starter data/alumni.xlsx
-├── generate-qr.js           # Generates checkin-qr.png from URL
-├── package.json             # Express, xlsx, qrcode, cors
-├── server.js                # Core API & SheetJS in-memory loader
-├── vercel.json              # Vercel deployment configuration
+│   └── checkin-qr.png       # Generated QR poster
+├── generate-qr.js           # Standalone QR generator script
+├── create-sample-data.js    # Starter sample data generator
+├── package.json             # Next.js, xlsx, aos, qrcode
+├── next.config.js           # Next.js configuration
+├── .gitignore               # Ignores .next, node_modules (tracks data/alumni.xlsx)
 └── README.md
 ```

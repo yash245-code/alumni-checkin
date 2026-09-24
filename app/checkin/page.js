@@ -11,6 +11,8 @@ export default function CheckInPage() {
   const [matchedName, setMatchedName] = useState(null);
   const [matchedDept, setMatchedDept] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [cardLoading, setCardLoading] = useState(false);
+  const [cardError, setCardError] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -66,6 +68,46 @@ export default function CheckInPage() {
     setMatchedName(null);
     setMatchedDept('');
     setErrorMessage('');
+    setCardError('');
+  }
+
+  async function handleDownloadCard() {
+    if (cardLoading) return;
+    setCardError('');
+    setCardLoading(true);
+
+    try {
+      const res = await fetch('/api/generate-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          identifier: identifier.trim(),
+          department: department.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Card generation failed');
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${matchedName || 'welcome'}-card.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (err) {
+      console.error('Card download failed:', err);
+      setCardError("Couldn't generate your card right now. Please try again.");
+    } finally {
+      setCardLoading(false);
+    }
   }
 
   return (
@@ -239,9 +281,33 @@ export default function CheckInPage() {
               </div>
             )}
 
-            <p className="text-xs sm:text-sm text-[#B0C4DE] leading-relaxed mb-7 px-2 font-normal [word-spacing:0.18em] opacity-90">
+            <p className="text-xs sm:text-sm text-[#B0C4DE] leading-relaxed mb-6 px-2 font-normal [word-spacing:0.18em] opacity-90">
               You are all set and checked in for today&apos;s event. Have an amazing time reconnecting with everyone!
             </p>
+
+            {/* Personalized welcome card download */}
+            <div className="mb-5">
+              <button
+                type="button"
+                onClick={handleDownloadCard}
+                disabled={cardLoading}
+                className="w-full min-h-[52px] px-6 py-3.5 rounded-full bg-gradient-to-r from-[#C5A059] via-[#DFBA73] to-[#F1D78A] hover:from-[#B89249] hover:to-[#E5C370] text-[#0A192F] font-bold text-sm sm:text-base shadow-lg active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 [word-spacing:0.18em]"
+              >
+                {cardLoading ? (
+                  <div className="spinner w-5 h-5" aria-label="Loading" />
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+                    </svg>
+                    <span>Download Your Welcome Card</span>
+                  </>
+                )}
+              </button>
+              {cardError && (
+                <p className="mt-2.5 text-xs text-rose-300 [word-spacing:0.14em]">{cardError}</p>
+              )}
+            </div>
 
             {/* Check in another person button */}
             <button 

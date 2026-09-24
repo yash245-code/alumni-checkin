@@ -4,21 +4,35 @@
 .pnp.js
 .yarn/cache
 
-# Next.js build output
+# Next.js & Turbopack build outputs
 /.next/
 /out/
 /build
+/.turbo
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel deployment metadata
+/.vercel
+
+# Local environment variables & keys
+.env
+.env*.local
+*.pem
+
+# Generated PDF welcome cards & local exports
+*.pdf
 
 # Root QR temporary files (keep public/checkin-qr.png)
 /checkin-qr.png
 /checkin-qr-ultrahd.png
 /QR/
 
-# Misc
-.DS_Store
-Thumbs.db
-cloudflared.exe
-.cache/
+# Temporary import archives
+/impv/
+*.zip
+*.tar.gz
+*.rar
 
 # Logs
 *.log
@@ -26,6 +40,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local environment variables
-.env*.local
-.env
+# OS & Editor files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+cloudflared.exe
+.cache/
+.vscode/
+.idea/
+*.swp
+*~
+

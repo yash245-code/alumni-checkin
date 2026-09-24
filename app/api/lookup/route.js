@@ -1,4 +1,14 @@
 import { findAlumniMatch, getAlumniData } from '@/lib/alumni-lookup';
+import { getRandomQuote } from '@/lib/card-quotes';
+
+function getPassCode(name, department) {
+  const raw = `${name || ''}-${department || ''}-2026`;
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    hash = (hash * 31 + raw.charCodeAt(i)) >>> 0;
+  }
+  return (hash % 9000 + 1000).toString();
+}
 
 // POST: Strict multi-field verification (Name, Email/Phone, and Department must all match)
 export async function POST(request) {
@@ -25,10 +35,15 @@ export async function POST(request) {
       });
     }
 
+    const quote = getRandomQuote();
+    const passCode = getPassCode(matched.name, matched.department);
+
     return Response.json({
       found: true,
       name: matched.name,
       department: matched.department,
+      quote,
+      passCode,
     });
   } catch (err) {
     console.error('API lookup error:', err);

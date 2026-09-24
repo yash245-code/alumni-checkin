@@ -39,6 +39,7 @@ export async function POST(request) {
     const pdfBytes = await generateAlumniCard({
       name: matched.name,
       department: matched.department,
+      quote: typeof body?.quote === 'string' && body.quote.trim() ? body.quote.trim() : undefined,
     });
 
     const safeFileName = matched.name.trim().replace(/[^a-z0-9]+/gi, '-').toLowerCase();

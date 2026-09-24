@@ -20,6 +20,8 @@
 @theme {
   --font-display: var(--font-display), sans-serif;
   --font-body: var(--font-body), sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-cormorant: var(--font-cormorant), 'Times New Roman', serif;
   --color-bg: var(--bg);
   --color-text: var(--text);
   --color-muted: var(--muted);
@@ -30,18 +32,59 @@
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(176, 196, 222, 0.28) #071224;
   }
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
     background-color: var(--bg);
     color: var(--text);
+    overflow-x: hidden;
   }
   body {
     background-color: var(--bg);
     color: var(--text);
     font-family: var(--font-body), sans-serif;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
+}
+
+/* ======================================================== */
+/* CLEAN CUSTOM SCROLLBAR (Sleek Dark Navy & Champagne Gold) */
+/* ======================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #071224;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(176, 196, 222, 0.25);
+  border-radius: 9999px;
+  border: 2px solid #071224;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(218, 165, 32, 0.65);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(218, 165, 32, 0.95);
+}
+
+/* Clean scroll helper classes */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Coordinate Graph Background Animation (Watercolor Blue painted on Deep Navy) */

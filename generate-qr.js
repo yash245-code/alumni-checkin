@@ -60,7 +60,7 @@ async function generate() {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alumni Check-in | Ultra HD QR Standee</title>
+  <title>Abhinandan 2026 | Alumni Check-in &amp; Greeting Standee</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -227,9 +227,9 @@ async function generate() {
 </head>
 <body>
   <div class="poster">
-    <div class="badge">Official Check-in</div>
+    <div class="badge">Abhinandan — Freshers Party 2026</div>
     <h1>Welcome Home, <span>Alumni</span></h1>
-    <p class="subtitle">Scan the QR code below using your mobile camera to quickly check in to today's gathering.</p>
+    <p class="subtitle">Scan the QR code below using your mobile camera to check in and collect your personalized welcome card.</p>
 
     <div class="qr-frame">
       ${svgContent}
